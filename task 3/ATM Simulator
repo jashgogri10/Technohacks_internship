@@ -1,0 +1,165 @@
+from tkinter import *
+
+class Atm:
+    counter = 1
+
+    def __init__(self):
+        self.__pin = None
+        self.__balance = 0
+        self.sno = Atm.counter
+        Atm.counter = Atm.counter + 1
+        self.create_main_gui()
+
+    def create_main_gui(self):
+        self.root = Tk()
+        self.root.title('ATM')
+        self.root.geometry('300x450')
+        self.root.resizable(0, 0)
+        self.root.configure(background='black')
+
+        main_frame = Frame(self.root, bg='black')
+        main_frame.pack(pady=20)
+
+        self.output_text = Text(main_frame, width=30, height=10, bg='black', fg='white', bd=0)
+        self.output_text.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+
+        btn_create_pin = Button(main_frame, text='Create Pin', bg='#00a65a', fg='white', width='11', height='3', command=self.open_create_pin_window)
+        btn_create_pin.grid(row=1, column=0, padx=5, pady=5)
+        btn_create_pin.config(font=('verdana', 9))
+
+        btn_deposit = Button(main_frame, text='Deposit', bg='#00a65a', fg='white', width='11', height='3', command=self.open_deposit_window)
+        btn_deposit.grid(row=1, column=1, padx=5, pady=5)
+        btn_deposit.config(font=('verdana', 9))
+
+        btn_withdraw = Button(main_frame, text='Withdraw', bg='#00a65a', fg='white', width='11', height='3', command=self.open_withdraw_window)
+        btn_withdraw.grid(row=2, column=0, padx=5, pady=5)
+        btn_withdraw.config(font=('verdana', 9))
+
+        btn_check_balance = Button(main_frame, text='Balance', bg='#00a65a', fg='white', width='11', height='3', command=self.open_balance_window)
+        btn_check_balance.grid(row=2, column=1, padx=5, pady=5)
+        btn_check_balance.config(font=('verdana', 9))
+
+        btn_exit = Button(main_frame, text='Exit', bg='#00a65a', fg='white', width='11', height='3', command=self.root.destroy)
+        btn_exit.grid(row=3, column=0, columnspan=2, pady=5)
+        btn_exit.config(font=('verdana', 9))
+
+        self.root.mainloop()
+
+
+
+    def open_create_pin_window(self):
+        pin_window = Toplevel(self.root)
+        pin_window.title('Create/Change PIN')
+        pin_window.geometry('200x150')
+        pin_window.resizable(0, 0)
+
+        label = Label(pin_window, text='Enter PIN:')
+        label.pack(pady=10)
+
+        pin_entry = Entry(pin_window, show='*')
+        pin_entry.pack(pady=5)
+
+        btn_save = Button(pin_window, text='Save', command=lambda: self.save_pin(pin_entry.get(), pin_window))
+        btn_save.pack(pady=5)
+
+    def save_pin(self, pin, pin_window):
+        if pin:
+            self.__pin = pin
+            self.output_text.insert(END, "Your PIN is set/changed successfully\n")
+        else:
+            self.output_text.insert(END, "Invalid PIN\n")
+        pin_window.destroy()
+
+    def open_deposit_window(self):
+        deposit_window = Toplevel(self.root)
+        deposit_window.title('Deposit')
+        deposit_window.geometry('200x150')
+        deposit_window.resizable(0, 0)
+
+        label = Label(deposit_window, text='Enter Amount:')
+        label.pack(pady=10)
+
+        amount_entry = Entry(deposit_window)
+        amount_entry.pack(pady=5)
+
+        btn_deposit = Button(deposit_window, text='Deposit', command=lambda: self.deposit(amount_entry.get(), deposit_window))
+        btn_deposit.pack(pady=5)
+
+    def deposit(self, amount, deposit_window):
+        if amount.isdigit():
+            amount = int(amount)
+            self.__balance += amount
+            self.output_text.insert(END, f"Deposit amount of {amount} successfully\n")
+        else:
+            self.output_text.insert(END, "Invalid amount\n")
+        deposit_window.destroy()
+
+    def open_withdraw_window(self):
+        withdraw_window = Toplevel(self.root)
+        withdraw_window.title('Withdraw')
+        withdraw_window.geometry('200x150')
+        withdraw_window.resizable(0, 0)
+
+        label = Label(withdraw_window, text='Enter Amount:')
+        label.pack(pady=10)
+
+        amount_entry = Entry(withdraw_window)
+        amount_entry.pack(pady=5)
+
+        btn_withdraw = Button(withdraw_window, text='Withdraw', command=lambda: self.withdraw(amount_entry.get(), withdraw_window))
+        btn_withdraw.pack(pady=5)
+
+    def withdraw(self, amount, withdraw_window):
+        if amount.isdigit():
+            amount = int(amount)
+            if amount <= self.__balance:
+                self.__balance -= amount
+                self.output_text.insert(END, f"Withdraw amount of {amount} successfully\n")
+            else:
+                self.output_text.insert(END, "Insufficient Balance\n")
+        else:
+            self.output_text.insert(END, "Invalid amount\n")
+        withdraw_window.destroy()
+
+    def open_balance_window(self):
+        balance_window = Toplevel(self.root)
+        balance_window.title('Balance')
+        balance_window.geometry('200x150')
+        balance_window.resizable(0, 0)
+
+        label = Label(balance_window, text=f'Your Balance: {self.__balance}')
+        label.pack(pady=10)
+
+        btn_close = Button(balance_window, text='Close', command=balance_window.destroy)
+        btn_close.pack(pady=5)
+
+    def check_balance(self, pin, balance_window):
+        if pin == self.__pin:
+            self.output_text.insert(END, "Your Balance is " + str(self.__balance) + "\n")
+        else:
+            self.output_text.insert(END, "Invalid Pin\n")
+        balance_window.destroy()
+
+    def get_amount_from_input(self, message):
+        amount_window = Toplevel(self.root)
+        amount_window.title('Amount')
+        amount_window.geometry('200x150')
+        amount_window.resizable(0, 0)
+
+        label = Label(amount_window, text=message)
+        label.pack(pady=10)
+
+        amount_entry = Entry(amount_window)
+        amount_entry.pack(pady=5)
+
+        btn_confirm = Button(amount_window, text='Confirm', command=lambda: self.process_amount(amount_entry.get(), amount_window))
+        btn_confirm.pack(pady=5)
+
+    def process_amount(self, amount, amount_window):
+        if amount.isdigit():
+            return int(amount)
+        else:
+            self.output_text.insert(END, "Invalid amount\n")
+        amount_window.destroy()
+
+obj = Atm()
